@@ -2,6 +2,7 @@ package com.random.randomw.controller;
 
 
 import com.random.randomw.entity.Word;
+import com.random.randomw.service.RandomWordService;
 import com.random.randomw.service.WordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/words")
 public class WordController {
+
+    @Autowired
+    private RandomWordService randomWordService;
 
     @Autowired
     private WordService wordService;
@@ -38,7 +42,11 @@ public class WordController {
         return ResponseEntity.noContent().build();
     }
 
-    
+    @GetMapping("/random")
+    public ResponseEntity<Word> getRandomWord() {
+        Word randomWord = wordService.getRandomWord();
+        return ResponseEntity.ok(randomWord);
+    }
 
 
 }

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Palavras</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 400px; margin: auto; text-align: center; }
+        input, button { padding: 10px; margin: 10px 0; width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Jogo de Palavras</h1>
+        <p>Traduza a palavra abaixo:</p>
+        <h2 id="word"></h2>
+        <input type="text" id="answer" placeholder="Digite a tradução">
+        <button onclick="checkAnswer()">Verificar Resposta</button>
+        <p id="feedback"></p>
+        <button onclick="newWord()">Nova Palavra</button>
+    </div>
+
+    <script>
+        let currentWord = '';
+
+        async function newWord() {
+            const response = await fetch('http://localhost:8080/api/words/random');
+            const data = await response.json();
+            currentWord = data.word;
+            document.getElementById('word').innerText = currentWord;
+            document.getElementById('feedback').innerText = '';
+            document.getElementById('answer').value = '';
+        }
+
+        function checkAnswer() {
+            const answer = document.getElementById('answer').value.trim();
+            if (answer.toLowerCase() === currentWord.translation.toLowerCase()) {
+                document.getElementById('feedback').innerText = 'Resposta correta!';
+                document.getElementById('feedback').style.color = 'green';
+            } else {
+                document.getElementById('feedback').innerText = 'Resposta errada. Tente novamente!';
+                document.getElementById('feedback').style.color = 'red';
+            }
+        }
+
+        // Iniciar o jogo com uma palavra aleatória
+        newWord();
+    </script>
+</body>
+</html>

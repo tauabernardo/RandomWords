@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f7f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        h1 {
+            color: #333;
+        }
+        #game, #addWordForm {
+            background-color: #ffffff;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        input {
+            padding: 10px;
+            margin: 5px 0;
+            width: calc(100% - 20px);
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4caf50;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        p {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Word Game</h1>
+    <div id="game">
+        <p>Guess the word:</p>
+        <h2 id="word">Loading...</h2>
+        <input type="text" id="answer" placeholder="Your answer here">
+        <button onclick="checkAnswer()">Submit</button>
+        <p id="feedback"></p>
+    </div>
+    <div id="addWordForm">
+        <h2>Add a New Word</h2>
+        <input type="text" id="newEnglishWord" placeholder="Word in English">
+        <input type="text" id="newPortugueseTranslation" placeholder="Translation in Portuguese">
+        <button onclick="addNewWord()">Add Word</button>
+        <p id="addFeedback"></p>
+    </div>
+
+    <script>
+        let currentWord = null;
+
+        async function newWord() {
+            try {
+                const response = await fetch('http://localhost:8080/api/words/random');
+                const data = await response.json();
+                currentWord = data;
+                document.getElementById('word').innerText = currentWord.englishWord;
+                document.getElementById('feedback').innerText = '';
+                document.getElementById('answer').value = '';
+            } catch (error) {
+                console.error('Error fetching random word:', error);
+                document.getElementById('word').innerText = 'Error loading word';
+            }
+        }
+
+        async function checkAnswer() {
+            const userAnswer = document.getElementById('answer').value.trim();
+            if (userAnswer === '') {
+                alert('Please enter an answer!');
+                return;
+            }
+
+            const isCorrect = userAnswer.toLowerCase() === currentWord.portugueseTranslation.toLowerCase();
+            const feedback = isCorrect
+                ? `Correct! The translation is: ${currentWord.portugueseTranslation}`
+                : `Wrong! The correct translation is: ${currentWord.portugueseTranslation}`;
+            
+            document.getElementById('feedback').innerText = feedback;
+
+            // Load a new word after a short delay
+            setTimeout(newWord, 3000);
+        }
+
+        async function addNewWord() {
+            const englishWord = document.getElementById('newEnglishWord').value.trim();
+            const portugueseTranslation = document.getElementById('newPortugueseTranslation').value.trim();
+
+            if (!englishWord || !portugueseTranslation) {
+                alert('Please fill out both fields!');
+                return;
+            }
+
+            const newWord = {
+                englishWord,
+                portugueseTranslation
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/api/words', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newWord)
+                });
+
+                if (response.ok) {
+                    document.getElementById('addFeedback').innerText = `Word "${englishWord}" added successfully!`;
+                    document.getElementById('newEnglishWord').value = '';
+                    document.getElementById('newPortugueseTranslation').value = '';
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error adding word:', errorData);
+                    document.getElementById('addFeedback').innerText = 'Error adding word. Check console for details.';
+                }
+            } catch (error) {
+                console.error('Error adding word:', error);
+                document.getElementById('addFeedback').innerText = 'Error adding word. Check console for details.';
+            }
+        }
+
+        // Load the first random word on page load
+        newWord();
+    </script>
+</body>
+</html>
