@@ -54,9 +54,6 @@ Se você quiser contribuir para o projeto, fique à vontade para fazer um fork e
 4. Envie para a branch original (`git push origin minha-feature`).
 5. Abra um Pull Request.
 
-## Licença
-
-Este projeto está licenciado sob a MIT License - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
 
